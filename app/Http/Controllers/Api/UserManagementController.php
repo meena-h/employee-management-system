@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\StoreUserRequest;
-use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Employee;
 use App\Models\User;
@@ -20,7 +19,7 @@ class UserManagementController extends Controller
         return UserResource::collection(User::with('employee')->paginate(15));
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(UserRequest $request)
     {
         $user = DB::transaction(function () use ($request) {
             $user = User::create([
@@ -44,7 +43,7 @@ class UserManagementController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UserRequest $request, User $user)
     {
         $data = $request->validated();
         $employeeId = $data['employee_id'] ?? null;
@@ -53,7 +52,6 @@ class UserManagementController extends Controller
         $user->update($data);
 
         if (array_key_exists('employee_id', $request->validated())) {
-            // Unlink any employee currently pointing to this user
             Employee::where('user_id', $user->id)->update(['user_id' => null]);
 
             if ($employeeId) {

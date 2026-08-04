@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Education\StoreEducationRequest;
-use App\Http\Requests\Education\UpdateEducationRequest;
+use App\Http\Requests\EducationRequest;
 use App\Http\Resources\EducationResource;
 use App\Models\Employee;
 use App\Models\EmployeeEducation;
@@ -18,7 +17,7 @@ class EducationController extends Controller
         return EducationResource::collection($employee->educations);
     }
 
-    public function store(StoreEducationRequest $request, Employee $employee)
+    public function store(EducationRequest $request, Employee $employee)
     {
         $education = $employee->educations()->create($request->validated());
 
@@ -27,7 +26,7 @@ class EducationController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateEducationRequest $request, Employee $employee, EmployeeEducation $education)
+    public function update(EducationRequest $request, Employee $employee, EmployeeEducation $education)
     {
         if ($education->employee_id !== $employee->id) {
             abort(404);

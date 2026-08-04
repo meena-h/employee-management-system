@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Experience\StoreExperienceRequest;
-use App\Http\Requests\Experience\UpdateExperienceRequest;
+use App\Http\Requests\ExperienceRequest;
 use App\Http\Resources\ExperienceResource;
 use App\Models\Employee;
 use App\Models\EmployeeExperience;
@@ -21,7 +20,7 @@ class ExperienceController extends Controller
         return ExperienceResource::collection($employee->experiences);
     }
 
-    public function store(StoreExperienceRequest $request, Employee $employee)
+    public function store(ExperienceRequest $request, Employee $employee)
     {
         $experience = $this->experienceService->create($employee, $request->validated());
 
@@ -30,7 +29,7 @@ class ExperienceController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateExperienceRequest $request, Employee $employee, EmployeeExperience $experience)
+    public function update(ExperienceRequest $request, Employee $employee, EmployeeExperience $experience)
     {
         if ($experience->employee_id !== $employee->id) {
             abort(404);

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FamilyMember\StoreFamilyMemberRequest;
-use App\Http\Requests\FamilyMember\UpdateFamilyMemberRequest;
+use App\Http\Requests\FamilyMemberRequest;
 use App\Http\Resources\FamilyMemberResource;
 use App\Models\Employee;
 use App\Models\EmployeeFamilyMember;
@@ -18,7 +17,7 @@ class FamilyMemberController extends Controller
         return FamilyMemberResource::collection($employee->familyMembers);
     }
 
-    public function store(StoreFamilyMemberRequest $request, Employee $employee)
+    public function store(FamilyMemberRequest $request, Employee $employee)
     {
         $member = $employee->familyMembers()->create($request->validated());
 
@@ -27,7 +26,7 @@ class FamilyMemberController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateFamilyMemberRequest $request, Employee $employee, EmployeeFamilyMember $familyMember)
+    public function update(FamilyMemberRequest $request, Employee $employee, EmployeeFamilyMember $familyMember)
     {
         if ($familyMember->employee_id !== $employee->id) {
             abort(404);

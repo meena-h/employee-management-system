@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Employee\StoreEmployeeRequest;
-use App\Http\Requests\Employee\UpdateEmployeeRequest;
+use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use App\Services\EmployeeService;
@@ -23,7 +22,7 @@ class EmployeeController extends Controller
         return EmployeeResource::collection($employees);
     }
 
-    public function store(StoreEmployeeRequest $request)
+    public function store(EmployeeRequest $request)
     {
         $employee = $this->employeeService->create($request->validated(), $request->user());
 
@@ -39,7 +38,7 @@ class EmployeeController extends Controller
         return new EmployeeResource($employee->load(['familyMembers', 'educations', 'experiences']));
     }
 
-    public function update(UpdateEmployeeRequest $request, Employee $employee)
+    public function update(EmployeeRequest $request, Employee $employee)
     {
         $employee = $this->employeeService->update($employee, $request->validated(), $request->user());
 
