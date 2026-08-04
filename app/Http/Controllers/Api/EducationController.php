@@ -29,6 +29,10 @@ class EducationController extends Controller
 
     public function update(UpdateEducationRequest $request, Employee $employee, EmployeeEducation $education)
     {
+        if ($education->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $education->update($request->validated());
 
         return new EducationResource($education);
@@ -36,6 +40,10 @@ class EducationController extends Controller
 
     public function destroy(Employee $employee, EmployeeEducation $education)
     {
+        if ($education->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $this->authorize('delete', $education);
 
         $education->delete();

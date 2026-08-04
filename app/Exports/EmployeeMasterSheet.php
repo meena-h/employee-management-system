@@ -9,7 +9,7 @@ use App\Exports\Sheets\PersonalInfoSheet;
 use App\Models\Employee;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class EmployeesExport implements WithMultipleSheets
+class EmployeeMasterSheet implements WithMultipleSheets
 {
     public function sheets(): array
     {

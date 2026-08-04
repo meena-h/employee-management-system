@@ -29,6 +29,10 @@ class FamilyMemberController extends Controller
 
     public function update(UpdateFamilyMemberRequest $request, Employee $employee, EmployeeFamilyMember $familyMember)
     {
+        if ($familyMember->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $familyMember->update($request->validated());
 
         return new FamilyMemberResource($familyMember);
@@ -36,6 +40,10 @@ class FamilyMemberController extends Controller
 
     public function destroy(Employee $employee, EmployeeFamilyMember $familyMember)
     {
+        if ($familyMember->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $this->authorize('delete', $familyMember);
 
         $familyMember->delete();

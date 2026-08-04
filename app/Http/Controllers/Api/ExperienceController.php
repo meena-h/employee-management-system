@@ -32,6 +32,10 @@ class ExperienceController extends Controller
 
     public function update(UpdateExperienceRequest $request, Employee $employee, EmployeeExperience $experience)
     {
+        if ($experience->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $experience = $this->experienceService->update($experience, $request->validated());
 
         return new ExperienceResource($experience);
@@ -39,6 +43,10 @@ class ExperienceController extends Controller
 
     public function destroy(Employee $employee, EmployeeExperience $experience)
     {
+        if ($experience->employee_id !== $employee->id) {
+            abort(404);
+        }
+
         $this->authorize('delete', $experience);
 
         $experience->delete();
