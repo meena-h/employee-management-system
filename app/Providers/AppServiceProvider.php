@@ -6,7 +6,6 @@ use App\Models\Employee;
 use App\Models\EmployeeEducation;
 use App\Models\EmployeeExperience;
 use App\Models\EmployeeFamilyMember;
-use App\Observers\EmployeeObserver;
 use App\Policies\EducationPolicy;
 use App\Policies\ExperiencePolicy;
 use App\Policies\FamilyMemberPolicy;
@@ -22,7 +21,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Employee::observe(EmployeeObserver::class);
 
         Gate::policy(EmployeeFamilyMember::class, FamilyMemberPolicy::class);
         Gate::policy(EmployeeEducation::class, EducationPolicy::class);

@@ -26,23 +26,15 @@ class EducationController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(EducationRequest $request, Employee $employee, EmployeeEducation $education)
+    public function update(EducationRequest $request, EmployeeEducation $education)
     {
-        if ($education->employee_id !== $employee->id) {
-            abort(404);
-        }
-
         $education->update($request->validated());
 
         return new EducationResource($education);
     }
 
-    public function destroy(Employee $employee, EmployeeEducation $education)
+    public function destroy(EmployeeEducation $education)
     {
-        if ($education->employee_id !== $employee->id) {
-            abort(404);
-        }
-
         $this->authorize('delete', $education);
 
         $education->delete();

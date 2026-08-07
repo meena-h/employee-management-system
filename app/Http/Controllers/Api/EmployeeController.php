@@ -26,7 +26,7 @@ class EmployeeController extends Controller
     {
         $employee = $this->employeeService->create($request->validated(), $request->user());
 
-        return (new EmployeeResource($employee))
+        return (new EmployeeResource($employee->load(['familyMembers', 'educations'])))
             ->response()
             ->setStatusCode(201);
     }

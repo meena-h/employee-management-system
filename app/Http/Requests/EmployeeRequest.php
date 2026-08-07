@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Employee;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,7 +20,7 @@ class EmployeeRequest extends FormRequest
     {
         $isCreate = $this->isMethod('post');
         $rule = $isCreate ? 'required' : 'sometimes';
-        $employeeId = $this->route('employee'); // null on create, the model on update
+        $employeeId = $this->route('employee');
 
         $rules = [
             'first_name' => [$rule, 'string', 'max:100'],
@@ -44,19 +44,32 @@ class EmployeeRequest extends FormRequest
             'emergency_contact_number' => ['nullable', 'string', 'regex:/^\+?[0-9\-\s]{7,20}$/'],
         ];
 
-        // user_id linking only makes sense on create
         if ($isCreate) {
             $rules['user_id'] = ['nullable', 'exists:users,id', 'unique:employees,user_id'];
         }
 
-        // Sensitive/administrative fields:
-        // - always required on create (any admin creating an employee sets these)
-        // - only editable by admin on update
         if ($isCreate || $this->user()->role === 'admin') {
             $rules['department'] = [$isCreate ? 'nullable' : 'sometimes', 'nullable', 'string', 'max:100'];
             $rules['designation'] = [$rule, 'string', 'max:100'];
             $rules['date_of_joining'] = [$rule, 'date'];
             $rules['employment_status'] = [$isCreate ? 'required' : 'sometimes', 'in:active,on_leave,resigned,terminated'];
+        }
+
+        if ($isCreate) {
+            $rules['family_members'] = ['nullable', 'array'];
+            $rules['family_members.*.name'] = ['required_with:family_members', 'string', 'max:150'];
+            $rules['family_members.*.relationship'] = ['required_with:family_members', 'in:spouse,father,mother,child,sibling,other'];
+            $rules['family_members.*.date_of_birth'] = ['nullable', 'date', 'before:today'];
+            $rules['family_members.*.occupation'] = ['nullable', 'string', 'max:150'];
+            $rules['family_members.*.contact_number'] = ['nullable', 'string', 'regex:/^\+?[0-9\-\s]{7,20}$/'];
+
+            $rules['educations'] = ['nullable', 'array'];
+            $rules['educations.*.institution'] = ['required_with:educations', 'string', 'max:255'];
+            $rules['educations.*.degree'] = ['required_with:educations', 'string', 'max:150'];
+            $rules['educations.*.specialization'] = ['nullable', 'string', 'max:150'];
+            $rules['educations.*.year_of_passing'] = ['required_with:educations', 'integer', 'min:1950', 'max:' . (date('Y') + 1)];
+            $rules['educations.*.score_type'] = ['required_with:educations', 'in:percentage,cgpa'];
+            $rules['educations.*.score_value'] = ['required_with:educations', 'numeric', 'min:0'];
         }
 
         return $rules;

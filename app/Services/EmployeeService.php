@@ -15,10 +15,24 @@ class EmployeeService
     public function create(array $data, User $creator): Employee
     {
         return DB::transaction(function () use ($data, $creator) {
+            $familyMembers = $data['family_members'] ?? [];
+            $educations = $data['educations'] ?? [];
+            unset($data['family_members'], $data['educations']);
+
             $data['employee_code'] = $this->codeGenerator->generate();
             $data['created_by'] = $creator->id;
 
-            return Employee::create($data);
+            $employee = Employee::create($data);
+
+            foreach ($familyMembers as $member) {
+                $employee->familyMembers()->create($member);
+            }
+
+            foreach ($educations as $education) {
+                $employee->educations()->create($education);
+            }
+
+            return $employee;
         });
     }
 
@@ -32,6 +46,11 @@ class EmployeeService
 
     public function delete(Employee $employee): void
     {
-        $employee->delete(); // cascades to children via EmployeeObserver (Step 12)
+        DB::transaction(function () use ($employee) {
+        $employee->familyMembers()->delete();
+        $employee->educations()->delete();
+        $employee->experiences()->delete();
+        $employee->delete();
+        });
     }
 }

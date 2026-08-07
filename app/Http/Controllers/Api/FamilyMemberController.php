@@ -26,23 +26,16 @@ class FamilyMemberController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(FamilyMemberRequest $request, Employee $employee, EmployeeFamilyMember $familyMember)
+    public function update(FamilyMemberRequest $request, EmployeeFamilyMember $familyMember)
     {
-        if ($familyMember->employee_id !== $employee->id) {
-            abort(404);
-        }
 
         $familyMember->update($request->validated());
 
         return new FamilyMemberResource($familyMember);
     }
 
-    public function destroy(Employee $employee, EmployeeFamilyMember $familyMember)
+    public function destroy(EmployeeFamilyMember $familyMember)
     {
-        if ($familyMember->employee_id !== $employee->id) {
-            abort(404);
-        }
-
         $this->authorize('delete', $familyMember);
 
         $familyMember->delete();

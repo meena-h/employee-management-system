@@ -29,23 +29,15 @@ class ExperienceController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(ExperienceRequest $request, Employee $employee, EmployeeExperience $experience)
+    public function update(ExperienceRequest $request, EmployeeExperience $experience)
     {
-        if ($experience->employee_id !== $employee->id) {
-            abort(404);
-        }
-
         $experience = $this->experienceService->update($experience, $request->validated());
 
         return new ExperienceResource($experience);
     }
 
-    public function destroy(Employee $employee, EmployeeExperience $experience)
+    public function destroy(EmployeeExperience $experience)
     {
-        if ($experience->employee_id !== $employee->id) {
-            abort(404);
-        }
-
         $this->authorize('delete', $experience);
 
         $experience->delete();

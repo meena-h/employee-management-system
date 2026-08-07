@@ -2,31 +2,29 @@
 
 namespace App\Exports\Sheets;
 
-use Illuminate\Support\Collection;
+use App\Models\EmployeeEducation;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
 class EducationsSheet implements FromCollection, WithHeadings, WithTitle
 {
-    public function __construct(protected Collection $employees) {}
-
     public function collection()
     {
+        $educations = EmployeeEducation::with('employee')->get();
+
         $rows = collect();
 
-        foreach ($this->employees as $employee) {
-            foreach ($employee->educations as $edu) {
-                $rows->push([
-                    $employee->employee_code,
-                    $edu->institution,
-                    $edu->degree,
-                    $edu->specialization,
-                    $edu->year_of_passing,
-                    $edu->score_type,
-                    $edu->score_value,
-                ]);
-            }
+        foreach ($educations as $edu) {
+            $rows->push([
+                $edu->employee->employee_code,
+                $edu->institution,
+                $edu->degree,
+                $edu->specialization,
+                $edu->year_of_passing,
+                $edu->score_type,
+                $edu->score_value,
+            ]);
         }
 
         return $rows;

@@ -9,17 +9,17 @@ use App\Exports\Sheets\PersonalInfoSheet;
 use App\Models\Employee;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class EmployeeMasterSheet implements WithMultipleSheets
+class EmployeeMasterExport implements WithMultipleSheets
 {
     public function sheets(): array
     {
-        $employees = Employee::with(['familyMembers', 'educations', 'experiences'])->get();
+        $employees = Employee::all();
 
         return [
             new PersonalInfoSheet($employees),
-            new FamilyMembersSheet($employees),
-            new EducationsSheet($employees),
-            new ExperiencesSheet($employees),
+            new FamilyMembersSheet(),
+            new EducationsSheet(),
+            new ExperiencesSheet(),
         ];
     }
 }
