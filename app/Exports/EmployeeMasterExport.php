@@ -13,13 +13,13 @@ class EmployeeMasterExport implements WithMultipleSheets
 {
     public function sheets(): array
     {
-        $employees = Employee::all();
+        $employees = Employee::with(['familyMembers.employee', 'educations.employee', 'experiences.employee'])->get();
 
         return [
             new PersonalInfoSheet($employees),
-            new FamilyMembersSheet(),
-            new EducationsSheet(),
-            new ExperiencesSheet(),
+            new FamilyMembersSheet($employees),
+            new EducationsSheet($employees),
+            new ExperiencesSheet($employees),
         ];
     }
 }

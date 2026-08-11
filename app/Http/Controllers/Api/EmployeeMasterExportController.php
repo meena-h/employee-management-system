@@ -13,6 +13,16 @@ class EmployeeMasterExportController extends Controller
     {
         $this->authorize('viewAny', Employee::class);
 
-        return Excel::download(new EmployeeMasterSheet, 'employees.xlsx');
+        try {
+            
+            return Excel::download(new EmployeeMasterExport, 'employees.xlsx');
+
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to export employees.',
+            ], 500);
+        }    
     }
 }

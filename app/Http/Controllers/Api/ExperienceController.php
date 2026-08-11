@@ -8,40 +8,74 @@ use App\Http\Resources\ExperienceResource;
 use App\Models\Employee;
 use App\Models\EmployeeExperience;
 use App\Services\ExperienceService;
+use Illuminate\Http\Request;
 
 class ExperienceController extends Controller
 {
     public function __construct(protected ExperienceService $experienceService) {}
 
-    public function index(Employee $employee)
+    public function index(Request $request)
     {
+        $employee = Employee::findOrFail($request->query('employee_id'));
+
         $this->authorize('viewAny', [EmployeeExperience::class, $employee]);
 
         return ExperienceResource::collection($employee->experiences);
     }
 
-    public function store(ExperienceRequest $request, Employee $employee)
+    public function store(ExperienceRequest $request)
     {
-        $experience = $this->experienceService->create($employee, $request->validated());
+        try {
+            $employee = Employee::findOrFail($request->validated('employee_id'));
 
-        return (new ExperienceResource($experience))
-            ->response()
-            ->setStatusCode(201);
+            $data = $request->validated();
+            unset($data['employee_id']);
+
+            $experience = $this->experienceService->create($employee, $data);
+
+            return (new ExperienceResource($experience))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to create experience record.',
+            ], 500);
+        }
     }
 
     public function update(ExperienceRequest $request, EmployeeExperience $experience)
     {
+        try {
+
         $experience = $this->experienceService->update($experience, $request->validated());
 
         return new ExperienceResource($experience);
+
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to update experience record.',
+            ], 500);
+        }
     }
 
     public function destroy(EmployeeExperience $experience)
     {
         $this->authorize('delete', $experience);
+        
+        try {
+            $experience->delete();
 
-        $experience->delete();
+            return response()->json(['message' => 'Experience record deleted successfully.'], 200);
+        } catch (\Throwable $e) {
+            report($e);
 
-        return response()->json(['message' => 'Experience record deleted successfully.'], 200);
+            return response()->json([
+                'message' => 'Failed to delete experience record.',
+            ], 500);
+        }
     }
 }

@@ -9,12 +9,16 @@ class EducationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // On create: no {education} in the route yet, check against the {employee}
         if ($this->isMethod('post')) {
-            return $this->user()->can('create', [\App\Models\EmployeeEducation::class, $this->route('employee')]);
+            $employee = \App\Models\Employee::find($this->input('employee_id'));
+
+            if (!$employee) {
+                return false;
+            }
+
+            return $this->user()->can('create', [\App\Models\EmployeeEducation::class, $employee]);
         }
 
-        // On update: check against the actual education record
         return $this->user()->can('update', $this->route('education'));
     }
 
@@ -23,7 +27,7 @@ class EducationRequest extends FormRequest
         // 'required' on create, 'sometimes' on update
         $rule = $this->isMethod('post') ? 'required' : 'sometimes';
 
-        return [
+        $rules = [
             'institution' => [$rule, 'string', 'max:255'],
             'degree' => [$rule, 'string', 'max:150'],
             'specialization' => ['nullable', 'string', 'max:150'],
@@ -31,6 +35,12 @@ class EducationRequest extends FormRequest
             'score_type' => [$rule, 'in:percentage,cgpa'],
             'score_value' => [$rule, 'numeric', 'min:0'],
         ];
+
+        if ($this->isMethod('post')) {
+            $rules['employee_id'] = ['required', 'exists:employees,id'];
+        }
+
+        return $rules;
     }
 
     /**

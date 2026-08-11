@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Employee;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class EmployeeService
 {
@@ -14,10 +13,14 @@ class EmployeeService
 
     public function create(array $data, User $creator): Employee
     {
-        return DB::transaction(function () use ($data, $creator) {
             $familyMembers = $data['family_members'] ?? [];
             $educations = $data['educations'] ?? [];
-            unset($data['family_members'], $data['educations']);
+            $experiences = $data['experiences'] ?? [];
+            unset(
+                $data['family_members'],
+                $data['educations'], 
+                $data['experiences'
+            ]);
 
             $data['employee_code'] = $this->codeGenerator->generate();
             $data['created_by'] = $creator->id;
@@ -32,8 +35,11 @@ class EmployeeService
                 $employee->educations()->create($education);
             }
 
+            foreach ($experiences as $experience) {
+                $employee->experiences()->create($experience);
+            }
+
             return $employee;
-        });
     }
 
     public function update(Employee $employee, array $data, User $updater): Employee
@@ -46,11 +52,9 @@ class EmployeeService
 
     public function delete(Employee $employee): void
     {
-        DB::transaction(function () use ($employee) {
         $employee->familyMembers()->delete();
         $employee->educations()->delete();
         $employee->experiences()->delete();
         $employee->delete();
-        });
     }
 }

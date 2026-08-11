@@ -21,45 +21,61 @@ class UserManagementController extends Controller
 
     public function store(UserRequest $request)
     {
-        $user = DB::transaction(function () use ($request) {
-            $user = User::create([
-                'name' => $request->validated('name'),
-                'email' => $request->validated('email'),
-                'password' => Hash::make($request->validated('password')),
-                'role' => $request->validated('role'),
-                'is_active' => true,
-            ]);
+        try {
+            $user = DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'name' => $request->validated('name'),
+                    'email' => $request->validated('email'),
+                    'password' => Hash::make($request->validated('password')),
+                    'role' => $request->validated('role'),
+                    'is_active' => true,
+                ]);
 
-            if ($request->filled('employee_id')) {
-                Employee::where('id', $request->validated('employee_id'))
-                    ->update(['user_id' => $user->id]);
-            }
+                if ($request->filled('employee_id')) {
+                    Employee::where('id', $request->validated('employee_id'))
+                        ->update(['user_id' => $user->id]);
+                }
 
-            return $user;
-        });
+                return $user;
+            });
 
-        return (new UserResource($user->load('employee')))
-            ->response()
-            ->setStatusCode(201);
+            return (new UserResource($user->load('employee')))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to create user.',
+            ], 500);
+        }
     }
 
     public function update(UserRequest $request, User $user)
     {
-        $data = $request->validated();
-        $employeeId = $data['employee_id'] ?? null;
-        unset($data['employee_id']);
+        try {
+            $data = $request->validated();
+            $employeeId = $data['employee_id'] ?? null;
+            unset($data['employee_id']);
 
-        $user->update($data);
+            $user->update($data);
 
-        if (array_key_exists('employee_id', $request->validated())) {
-            Employee::where('user_id', $user->id)->update(['user_id' => null]);
+            if (array_key_exists('employee_id', $request->validated())) {
+                Employee::where('user_id', $user->id)->update(['user_id' => null]);
 
-            if ($employeeId) {
-                Employee::where('id', $employeeId)->update(['user_id' => $user->id]);
+                if ($employeeId) {
+                    Employee::where('id', $employeeId)->update(['user_id' => $user->id]);
+                }
             }
-        }
 
-        return new UserResource($user->fresh('employee'));
+            return new UserResource($user->fresh('employee'));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to update user.',
+            ], 500);
+        }
     }
 
     public function destroy(User $user)
@@ -70,10 +86,20 @@ class UserManagementController extends Controller
             return response()->json(['message' => 'You cannot deactivate your own account.'], 422);
         }
 
-        $user->update(['is_active' => false]);
-        $user->tokens()->delete(); // revoke all active sessions immediately
+        try {   
 
-        return response()->json(['message' => 'User deactivated successfully.']);
+            $user->update(['is_active' => false]);
+            $user->tokens()->delete(); // revoke all active sessions immediately
+
+            return response()->json(['message' => 'User deactivated successfully.']);
+
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to deactivate user.',
+            ], 500);
+        }
     }
 
     private function authorizeAdmin(): void

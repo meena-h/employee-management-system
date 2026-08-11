@@ -13,11 +13,20 @@ class EmployeeReportController extends Controller
     public function download(Employee $employee)
     {
         $this->authorize('view', $employee);
+        try {
 
-        $content = $this->pdfService->generate($employee);
+            $content = $this->pdfService->generate($employee);
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', "attachment; filename={$employee->employee_code}-biodata.pdf");
+            return response($content, 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', "attachment; filename={$employee->employee_code}-biodata.pdf");
+
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to generate employee report.',
+            ], 500);
+        }
     }
 }

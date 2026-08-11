@@ -9,7 +9,13 @@ class ExperienceRequest extends FormRequest
     public function authorize(): bool
     {
         if ($this->isMethod('post')) {
-            return $this->user()->can('create', [\App\Models\EmployeeExperience::class, $this->route('employee')]);
+            $employee = \App\Models\Employee::find($this->input('employee_id'));
+
+            if (!$employee) {
+                return false;
+            }
+
+            return $this->user()->can('create', [\App\Models\EmployeeExperience::class, $employee]);
         }
 
         return $this->user()->can('update', $this->route('experience'));
@@ -19,12 +25,18 @@ class ExperienceRequest extends FormRequest
     {
         $rule = $this->isMethod('post') ? 'required' : 'sometimes';
 
-        return [
+        $rules = [
             'company_name' => [$rule, 'string', 'max:255'],
             'designation' => [$rule, 'string', 'max:150'],
             'start_date' => [$rule, 'date'],
             'end_date' => ['nullable', 'date', 'after:start_date'],
             'responsibilities' => ['nullable', 'string', 'max:2000'],
         ];
+
+        if ($this->isMethod('post')) {
+            $rules['employee_id'] = ['required', 'exists:employees,id'];
+        }
+
+        return $rules;
     }
 }

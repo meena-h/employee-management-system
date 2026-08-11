@@ -2,32 +2,32 @@
 
 namespace App\Exports\Sheets;
 
-use App\Models\EmployeeEducation;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
 class EducationsSheet implements FromCollection, WithHeadings, WithTitle
 {
+    public function __construct(protected Collection $employees) {}
     public function collection()
     {
-        $educations = EmployeeEducation::with('employee')->get();
 
-        $rows = collect();
+        return $this->employees
+    ->pluck('educations')
+    ->flatten()
+    ->map(function ($education) {
+        return [
+            $education->employee->employee_code,
+            $education->institution,
+            $education->degree,
+            $education->specialization,
+            $education->year_of_passing,
+            $education->score_type,
+            $education->score_value,
+        ];
+    });
 
-        foreach ($educations as $edu) {
-            $rows->push([
-                $edu->employee->employee_code,
-                $edu->institution,
-                $edu->degree,
-                $edu->specialization,
-                $edu->year_of_passing,
-                $edu->score_type,
-                $edu->score_value,
-            ]);
-        }
-
-        return $rows;
     }
 
     public function headings(): array

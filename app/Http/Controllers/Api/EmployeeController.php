@@ -8,6 +8,8 @@ use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use App\Services\EmployeeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class EmployeeController extends Controller
 {
@@ -24,11 +26,23 @@ class EmployeeController extends Controller
 
     public function store(EmployeeRequest $request)
     {
-        $employee = $this->employeeService->create($request->validated(), $request->user());
+        try {
+            $employee = DB::transaction(function () use ($request) {
+                return $this->employeeService->create(
+                    $request->validated(),
+                    $request->user()
+                );
+            });
 
-        return (new EmployeeResource($employee->load(['familyMembers', 'educations'])))
-            ->response()
-            ->setStatusCode(201);
+            return (new EmployeeResource($employee->load(['familyMembers', 'educations', 'experiences'])))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $e) {
+        return response()->json([
+            'message' => 'Failed to create employee.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }    
     }
 
     public function show(Employee $employee)
@@ -40,16 +54,43 @@ class EmployeeController extends Controller
 
     public function update(EmployeeRequest $request, Employee $employee)
     {
-        $employee = $this->employeeService->update($employee, $request->validated(), $request->user());
+        try {
+            $employee = $this->employeeService->update(
+                $employee,
+                $request->validated(), 
+                $request->user()
+            );
 
-        return new EmployeeResource($employee);
+            return new EmployeeResource($employee);
+            
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to update employee.',
+            ], 500);
+        }
     }
 
     public function destroy(Employee $employee)
     {
         $this->authorize('delete', $employee);
-        $this->employeeService->delete($employee);
-        return response()->json(null, 204);
+
+        try {
+
+            DB::transaction(function () use ($employee) {
+                $this->employeeService->delete($employee);
+            });
+
+            return response()->json(null, 204);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'message' => 'Failed to delete employee.',
+                'error' => $e->getMessage(),
+            ], 500);
+    }
     }
 
     public function myProfile(Request $request)
@@ -57,7 +98,8 @@ class EmployeeController extends Controller
         $employee = $request->user()->employee;
 
         if (!$employee) {
-            return response()->json(['message' => 'No employee profile linked to this account.'], 404);
+            return response()->json([
+                'message' => 'No employee profile linked to this account.'], 404);
         }
 
         return new EmployeeResource($employee->load(['familyMembers', 'educations', 'experiences']));
