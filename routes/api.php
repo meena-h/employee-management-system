@@ -23,32 +23,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/employees/export', [EmployeeMasterExportController::class, 'export']);
     Route::post('/employees/import', [EmployeeImportController::class, 'import']);   
 
-    Route::get('/employees', [EmployeeController::class, 'index']);
-    Route::post('/employees', [EmployeeController::class, 'store']);
-    Route::get('/employees/{employee}', [EmployeeController::class, 'show']);
+    Route::get('/employee', [EmployeeController::class, 'index']);
+    Route::post('/employee', [EmployeeController::class, 'store']);
+    Route::get('/employee/{employee}', [EmployeeController::class, 'show']);
     Route::match(['put', 'patch'], '/employees/{employee}', [EmployeeController::class, 'update']);
-    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
+    Route::delete('/employee/{employee}', [EmployeeController::class, 'destroy']);
 
     Route::get('/me/employee', [EmployeeController::class, 'myProfile']);
 
-    Route::get('/employees-family-members', [FamilyMemberController::class, 'index']);
-    Route::post('/employees-family-members', [FamilyMemberController::class, 'store']);
-    Route::put('/employees-family-members/{familyMember}', [FamilyMemberController::class, 'update']);
-    Route::delete('/employees-family-members/{familyMember}', [FamilyMemberController::class, 'destroy']);
+    Route::get('/employee-family-members', [FamilyMemberController::class, 'index']);
+    Route::post('/employee-family-members', [FamilyMemberController::class, 'store']);
+    Route::put('/employee-family-members/{familyMember}', [FamilyMemberController::class, 'update']);
+    Route::delete('/employee-family-members/{familyMember}', [FamilyMemberController::class, 'destroy']);
 
 
-    Route::get('/employees-educations', [EducationController::class, 'index']);
-    Route::post('/employees-educations', [EducationController::class, 'store']);
-    Route::put('/employees-educations/{education}', [EducationController::class, 'update']);
-    Route::delete('/employees-educations/{education}', [EducationController::class, 'destroy']);
+    Route::get('/employee-educations', [EducationController::class, 'index']);
+    Route::post('/employee-educations', [EducationController::class, 'store']);
+    Route::put('/employee-educations/{education}', [EducationController::class, 'update']);
+    Route::delete('/employee-educations/{education}', [EducationController::class, 'destroy']);
 
 
-    Route::get('/employees-experiences', [ExperienceController::class, 'index']);
-    Route::post('/employees-experiences', [ExperienceController::class, 'store']);
-    Route::put('/employees-experiences/{experience}', [ExperienceController::class, 'update']);
-    Route::delete('/employees-experiences/{experience}', [ExperienceController::class, 'destroy']);
+    Route::get('/employee-experiences', [ExperienceController::class, 'index']);
+    Route::post('/employee-experiences', [ExperienceController::class, 'store']);
+    Route::put('/employee-experiences/{experience}', [ExperienceController::class, 'update']);
+    Route::delete('/employee-experiences/{experience}', [ExperienceController::class, 'destroy']);
 
-    Route::get('/employees/{employee}/biodata-pdf', [EmployeeReportController::class, 'download']);
+    Route::get('/employee/{employee}/biodata-pdf', [EmployeeReportController::class, 'download']);
 
     Route::get('/users', [UserManagementController::class, 'index']);
     Route::post('/users', [UserManagementController::class, 'store']);
